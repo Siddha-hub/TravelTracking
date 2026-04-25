@@ -1,322 +1,317 @@
-_schema-version: "3.2"
-ID: adoptiontracker
-description: A simple CAP project.
-version: 1.0.0
-modules:
-#---------------------------------------------
-# Service module
-#---------------------------------------------
-- name: adoptiontracker-srv
-  type: nodejs
-  path: gen/srv
-  requires:
-  - name: adoptiontracker-db
-  - name: adoptiontracker-uaa
-  - name: adoptiontracker-logs
-  - name: totango-destination
-  provides:
-  - name: srv-api
-    properties:
-      srv-url: ${default-url}
-  parameters:
-    buildpack: nodejs_buildpack
-    memory: 2G
-    disk-quota: 1024M
-  build-parameters:
-     ignore: ["node_modules/"]
-
-#---------------------------------------------
-# DB deployer module
-#---------------------------------------------
-- name: adoptiontracker-db-deployer
-  type: hdb
-  path: gen/db
-  requires:
-  - name: adoptiontracker-db
-  - name: adoptiontracker-uaa
-  parameters:
-    buildpack: nodejs_buildpack
-  properties:
-    HDI_DEPLOY_OPTIONS: "{ \"auto_undeploy\": true, \"trace\": true }"
-  build-parameters:
-     ignore: ["node_modules/"]
-
-#---------------------------------------------
-# Destinations module
-#
-# By default destinations seem to have a 30s
-# timeout. AS our updateCustomers action takes
-# longer than 30s we must add the extended
-# timeouts below, otherwise we get 540
-# Gateway Timeout errors.
-# Below we set a timeout to 15min.
-#---------------------------------------------
-- name: adoptiontracker-destinations
-  type: com.sap.application.content
-  requires:
-  - name: adoptiontracker-uaa
-    parameters:
-      service-key:
-        name: adoptiontracker-uaa-key
-  - name: adoptiontracker-html5-repo-host
-    parameters:
-      service-key:
-        name: adoptiontracker-html5-repo-host-key
-  - name: srv-api
-  - name: adoptiontracker-destination
-    parameters:
-      content-target: true
-  parameters:
-    content:
-      instance:
-        destinations:
-        # This is the destination to the cap service module
-        - Authentication: OAuth2UserTokenExchange
-          Name: adoptiontracker-app-srv
-          TokenServiceInstanceName: adoptiontracker-uaa
-          TokenServiceKeyName: adoptiontracker-uaa-key
-          URL: ~{srv-api/srv-url}
-          sap.cloud.service: adoptiontracker
-        - Name: adoptiontracker-html5-repo-host
-          ServiceInstanceName: adoptiontracker-html5-repo-host
-          ServiceKeyName: adoptiontracker-html5-repo-host-key
-          sap.cloud.service: adoptiontracker
-        - Authentication: OAuth2UserTokenExchange
-          Name: adoptiontracker-uaa
-          ServiceInstanceName: adoptiontracker-uaa
-          ServiceKeyName: adoptiontracker-uaa-key
-          sap.cloud.service: adoptiontracker
-        existing_destinations_policy: update
-  build-parameters:
-    no-source: true
-
-#---------------------------------------------
-# UI app deployer module
-#---------------------------------------------
-- name: adoptiontracker-app-content
-  type: com.sap.application.content
-  path: .
-  requires:
-  - name: adoptiontracker-html5-repo-host
-    parameters:
-      content-target: true
-  build-parameters:
-    build-result: resources
-    requires:
-    - artifacts:
-      - comsappntceecustomers.zip
-      name: comsappntceecustomers
-      target-path: resources/
-    - artifacts:
-      - comsappntceeactivities.zip
-      name: comsappntceeactivities
-      target-path: resources/
-    - artifacts:
-      - comsappntceeproducts.zip
-      name: comsappntceeproducts
-      target-path: resources/
-    - artifacts:
-      - comsappntceesupportingteams.zip
-      name: comsappntceesupportingteams
-      target-path: resources/
-
-#---------------------------------------------
-# UI app module - Customers
-#---------------------------------------------
-- name: comsappntceecustomers
-  type: html5
-  path: app/customers
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# UI app module - Activities
-#---------------------------------------------
-- name: comsappntceeactivities
-  type: html5
-  path: app/activities
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# UI app module - Products
-#---------------------------------------------
-- name: comsappntceeproducts
-  type: html5
-  path: app/products
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# UI app module - SupportingTeams
-#---------------------------------------------
-- name: comsappntceesupportingteams
-  type: html5
-  path: app/supportingteams
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# REQUIRED RESOURCES
-#---------------------------------------------
-resources:
-
-#---------------------------------------------
-# HDI container instance
-#---------------------------------------------
-- name: adoptiontracker-db
-  type: com.sap.xs.hdi-container
-  parameters:
-    service: hana
-    service-plan: hdi-shared
-  properties:
-    hdi-service-name: ${service-name}
-
-#---------------------------------------------
-# UAA service instance & Role Collections
-#---------------------------------------------
-- name: adoptiontracker-uaa
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      role-collections:
-      - description: Manage Engagement Planner
-        name: AdoptionTrackerAdmin-${space}
-        role-template-references:
-        - $XSAPPNAME.AdoptionTrackerAdmin
-      - description: View Engagement Planner Customers
-        name: AdoptionTrackerViewer-${space}
-        role-template-references:
-        - $XSAPPNAME.AdoptionTrackerViewer
-      - description: Maintain Engagement Planner Products
-        name: AdoptionTrackerProductsEditor-${space}
-        role-template-references:
-        - $XSAPPNAME.AdoptionTrackerProductsEditor
-      - description: Maintain Engagement Planner SupportingTeams
-        name: AdoptionTrackerSupportingTeamsEditor-${space}
-        role-template-references:
-        - $XSAPPNAME.AdoptionTrackerSupportingTeamsEditor
-      - description: Engagement Planner - READONLY
-        name: AdoptionTrackerREADONLY-${space}
-        role-template-references:
-        - $XSAPPNAME.AdoptionTrackerREADONLY
-      tenant-mode: dedicated
-      xsappname: adoptiontracker-${space}
-    path: ./xs-security.json
-    service: xsuaa
-    service-plan: application
-
-#---------------------------------------------
-# Destination (UI5 CDN) service instance
-#---------------------------------------------
-- name: adoptiontracker-destination
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      init_data:
-        instance:
-          destinations:
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
-          existing_destinations_policy: update
-      version: 1.0.0
-    service: destination
-    service-plan: lite
-
-#---------------------------------------------
-# HTML repo service instance
-#---------------------------------------------
-- name: adoptiontracker-html5-repo-host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-plan: app-host
-
-#---------------------------------------------
-# Application logging service instance
-#---------------------------------------------
-- name: adoptiontracker-logs
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: application-logs
-    service-plan: lite
-
-#------------------------------------------------------
-# Destination service instance
-# NOTE: You can only have the one instance defined
-# here in the resources section , else the destination
-# lookup from the Cloud SDK seems to fail.
-#------------------------------------------------------
-- name: totango-destination
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      init_data:
-        instance:
-          destinations:
-          #---------------------------
-          # Totango destination
-          #---------------------------
-          - Authentication: NoAuthentication
-            Name: totango
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://api-eu1.totango.com/api/v1/search/accounts
-            HTML5.Timeout: 1800000
-            timeout: 1800000
-            ClientReadTimeout: 1800000
-          #---------------------------
-          # Activity Repo destination
-          #---------------------------
-          - Authentication: NoAuthentication
-            Name: activityreporemotedest
-            ProxyType: Internet
-            Type: HTTP
-            #URL: https://${org}-${space}-activityrepo-srv.${default-domain} - ${org} does not work when the name has spaces in it!!!
-            URL: https://p-t-cee-dev-activityrepo-srv.cfapps.ap10.hana.ondemand.com
-          existing_destinations_policy: ignore
-      version: 1.0.0
-    service: destination
-    service-plan: lite
-
-#---------------------------------------------
-# Global MTA parameters
-#---------------------------------------------
+_schema-version: "3.1"
+ID: btp-resource-consumption
+version: 2.3.0
+description: BTP usage and resource consumption dashboard
 parameters:
-  deploy_mode: html5-repo
   enable-parallel-deployments: true
+  deploy_mode: html5-repo
 build-parameters:
   before-all:
-  - builder: custom
-    commands:
-    - npm install --production
-    - npx -p @sap/cds-dk cds build --production
+    - builder: custom
+      commands:
+        - npm ci
+        - npm run build:cf
+
+modules:
+  - name: BTPResourceConsumption-srv
+    type: nodejs
+    path: gen/srv
+    deployed-after:
+      - BTPResourceConsumption-db-deployer
+    parameters:
+      buildpack: nodejs_buildpack
+      disk-quota: 512M
+      memory: 512M
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules/
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: btprc-auth
+      - name: btprc-dest
+      - name: btprc-db
+      - name: btprc-uas
+      - name: btprc-notif
+      - name: btprc-scheduler
+      # - name: btprc-uas-ups
+
+  - name: BTPResourceConsumption-db-deployer
+    type: hdb
+    path: gen/db
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules/
+    parameters:
+      buildpack: nodejs_buildpack
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: btprc-db
+
+  - name: btprc-dest-content
+    type: com.sap.application.content
+    requires:
+      - name: btprc-dest
+        parameters:
+          content-target: true
+      - name: srv-api
+      - name: btprc-auth
+        parameters:
+          service-key:
+            name: btprc-auth-key
+      - name: btprc-repo-host
+        parameters:
+          service-key:
+            name: btprc-repo-host-key
+    parameters:
+      content:
+        subaccount:
+          destinations:
+            - Name: btprc-srv
+              Authentication: OAuth2JWTBearer
+              TokenServiceInstanceName: btprc-auth
+              TokenServiceKeyName: btprc-auth-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: sap.btp.resourceconsumption
+              HTML5.DynamicDestination: true
+              WebIDEEnabled: true
+              WebIDEUsage: odata_gen
+          existing_destinations_policy: update
+        instance:
+          destinations:
+            - Name: btprc-srv-api
+              Authentication: OAuth2JWTBearer
+              TokenServiceInstanceName: btprc-auth
+              TokenServiceKeyName: btprc-auth-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: sap.btp.resourceconsumption
+              HTML5.Timeout: 120000
+            - Name: btprc-repo-host
+              ServiceInstanceName: btprc-repo-host
+              ServiceKeyName: btprc-repo-host-key
+              sap.cloud.service: sap.btp.resourceconsumption
+            - Name: btprc-auth
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: btprc-auth
+              ServiceKeyName: btprc-auth-key
+              sap.cloud.service: sap.btp.resourceconsumption
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
+
+  - name: btprc-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: btprc-repo-host
+        parameters:
+          content-target: true
+          service-key:
+            name: btprc-repo-host-key
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: btprcreport
+          target-path: resources/
+          artifacts:
+            - btprcreport.zip
+        - name: managealerts
+          target-path: resources/
+          artifacts:
+            - managealerts.zip
+        - name: managetags
+          target-path: resources/
+          artifacts:
+            - managetags.zip
+        - name: measurestotal
+          target-path: resources/
+          artifacts:
+            - measurestotal.zip
+        - name: measuresbytags
+          target-path: resources/
+          artifacts:
+            - measuresbytags.zip
+        - name: measuresforyears
+          target-path: resources/
+          artifacts:
+            - measuresforyears.zip
+        - name: measuresforyearbytags
+          target-path: resources/
+          artifacts:
+            - measuresforyearbytags.zip
+        - name: billingdifferences
+          target-path: resources/
+          artifacts:
+            - billingdifferences.zip
+
+  - name: btprcreport
+    type: html5
+    path: app/btprcreport
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+  - name: managealerts
+    type: html5
+    path: app/managealerts
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+  - name: managetags
+    type: html5
+    path: app/managetags
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+  - name: measurestotal
+    type: html5
+    path: app/measurestotal
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+  - name: measuresbytags
+    type: html5
+    path: app/measuresbytags
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+  - name: measuresforyears
+    type: html5
+    path: app/measuresforyears
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+  - name: measuresforyearbytags
+    type: html5
+    path: app/measuresforyearbytags
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+  - name: billingdifferences
+    type: html5
+    path: app/billingdifferences
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+resources:
+  - name: btprc-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+      config:
+        schema: BTPRC_${space}
+      service-keys:
+        - name: btprc-db-key
+
+  - name: btprc-scheduler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: jobscheduler
+      service-plan: standard
+      config:
+        enable-xsuaa-support: true
+      service-keys:
+        - name: btprc-scheduler-key
+
+  - name: btprc-notif
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: alert-notification
+      service-plan: standard
+      service-keys:
+        - name: btprc-notif-key
+
+  - name: btprc-uas
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: uas
+      service-plan: reporting-ga-admin
+      service-keys:
+        - name: btprc-uas-key
+  # - name: btprc-uas-ups
+  #   type: org.cloudfoundry.existing-service
+
+  - name: btprc-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: btprc-${space}
+        tenant-mode: dedicated
+      service-keys:
+        - name: btprc-auth-key
+
+  - name: btprc-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+      service-keys:
+        - name: btprc-repo-host-key
+
+  - name: btprc-dest
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+        version: 1.0.0
+      service-keys:
+        - name: btprc-dest-key

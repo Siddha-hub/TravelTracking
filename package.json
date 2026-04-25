@@ -23,6 +23,7 @@
     "start": "cds-serve",
     "watch": "cds watch",
     "build": "mbt build --mtar travelTracker.mtar",
+    "build:cf": "npx cds build --production",
     "watch-traveltrackingui": "cds watch --open traveltrackingui/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "cds": {
