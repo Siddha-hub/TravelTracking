@@ -1,167 +1,248 @@
-_schema-version: '3.1'
+_schema-version: "3.2"
 ID: travel-tracking
+description: Travel Tracking & Budget Management Application
 version: 1.0.0
-description: Travel Tracking Application
+modules:
+#---------------------------------------------
+# Service module
+#---------------------------------------------
+- name: travel-tracking-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: travel-tracking-db
+  - name: travel-tracking-uaa
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    memory: 256M
+    disk-quota: 1024M
+  build-parameters:
+     ignore: ["node_modules/"]
 
+#---------------------------------------------
+# DB deployer module
+#---------------------------------------------
+- name: travel-tracking-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: travel-tracking-db
+  - name: travel-tracking-uaa
+  parameters:
+    buildpack: nodejs_buildpack
+  properties:
+    HDI_DEPLOY_OPTIONS: "{ \"auto_undeploy\": true, \"trace\": true }"
+  build-parameters:
+     ignore: ["node_modules/"]
+
+#---------------------------------------------
+# Destinations module
+#---------------------------------------------
+- name: travel-tracking-destinations
+  type: com.sap.application.content
+  requires:
+  - name: travel-tracking-uaa
+    parameters:
+      service-key:
+        name: travel-tracking-uaa-key
+  - name: travel-tracking-html5-repo-host
+    parameters:
+      service-key:
+        name: travel-tracking-html5-repo-host-key
+  - name: srv-api
+  - name: travel-tracking-destination
+    parameters:
+      content-target: true
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Authentication: OAuth2UserTokenExchange
+          Name: travel-tracking-app-srv
+          TokenServiceInstanceName: travel-tracking-uaa
+          TokenServiceKeyName: travel-tracking-uaa-key
+          URL: ~{srv-api/srv-url}
+          sap.cloud.service: travel-tracking
+        - Name: travel-tracking-html5-repo-host
+          ServiceInstanceName: travel-tracking-html5-repo-host
+          ServiceKeyName: travel-tracking-html5-repo-host-key
+          sap.cloud.service: travel-tracking
+        - Authentication: OAuth2UserTokenExchange
+          Name: travel-tracking-uaa
+          ServiceInstanceName: travel-tracking-uaa
+          ServiceKeyName: travel-tracking-uaa-key
+          sap.cloud.service: travel-tracking
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+
+#---------------------------------------------
+# UI app deployer module
+#---------------------------------------------
+- name: travel-tracking-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: travel-tracking-html5-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - traveltrackingui.zip
+      name: travel-tracking-traveltrackingui
+      target-path: resources/
+    - artifacts:
+      - budgetmanagerui.zip
+      name: travel-tracking-budgetmanagerui
+      target-path: resources/
+    - artifacts:
+      - budgetanalyticsui.zip
+      name: travel-tracking-budgetanalyticsui
+      target-path: resources/
+    - artifacts:
+      - budgetui.zip
+      name: travel-tracking-budgetui
+      target-path: resources/
+
+#---------------------------------------------
+# UI app module - Travel Tracking
+#---------------------------------------------
+- name: travel-tracking-traveltrackingui
+  type: html5
+  path: app/traveltrackingui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+    ignore: ["node_modules/"]
+
+#---------------------------------------------
+# UI app module - Budget Manager
+#---------------------------------------------
+- name: travel-tracking-budgetmanagerui
+  type: html5
+  path: app/budgetmanagerui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+    ignore: ["node_modules/"]
+
+#---------------------------------------------
+# UI app module - Budget Analytics
+#---------------------------------------------
+- name: travel-tracking-budgetanalyticsui
+  type: html5
+  path: app/budgetanalyticsui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+    ignore: ["node_modules/"]
+
+#---------------------------------------------
+# UI app module - Budget Combined
+#---------------------------------------------
+- name: travel-tracking-budgetui
+  type: html5
+  path: app/budgetui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+    ignore: ["node_modules/"]
+
+#---------------------------------------------
+# REQUIRED RESOURCES
+#---------------------------------------------
+resources:
+
+#---------------------------------------------
+# HDI container instance
+#---------------------------------------------
+- name: travel-tracking-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+  properties:
+    hdi-service-name: ${service-name}
+
+#---------------------------------------------
+# UAA service instance & Role Collections
+#---------------------------------------------
+- name: travel-tracking-uaa
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      role-collections:
+      - description: Travel Tracking Administrator
+        name: TravelTrackingAdmin-${space}
+        role-template-references:
+        - $XSAPPNAME.TravelAdmin
+      tenant-mode: dedicated
+      xsappname: travel-tracking-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+
+#---------------------------------------------
+# Destination (UI5 CDN) service instance
+#---------------------------------------------
+- name: travel-tracking-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-plan: lite
+
+#---------------------------------------------
+# HTML repo service instance
+#---------------------------------------------
+- name: travel-tracking-html5-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-host
+
+#---------------------------------------------
+# Global MTA parameters
+#---------------------------------------------
 parameters:
+  deploy_mode: html5-repo
   enable-parallel-deployments: true
-
 build-parameters:
   before-all:
-    - builder: custom
-      commands:
-        - npm ci
-        - npx cds build --production
-
-modules:
-  # ----- SERVER MODULE -----
-  - name: travel-tracking-srv
-    type: nodejs
-    path: gen/srv
-    parameters:
-      buildpack: nodejs_buildpack
-      memory: 256M
-      disk-quota: 1024M
-    requires:
-      - name: travel-tracking-db
-      - name: travel-tracking-auth
-    provides:
-      - name: srv-api
-        properties:
-          srv-url: ${default-url}
-
-  # ----- DATABASE MODULE -----
-  - name: travel-tracking-db-deployer
-    type: hdb
-    path: gen/db
-    parameters:
-      buildpack: nodejs_buildpack
-    requires:
-      - name: travel-tracking-db
-
-  # ----- UI DEPLOYER MODULE -----
-  - name: travel-tracking-app-deployer
-    type: com.sap.application.content
-    path: .
-    requires:
-      - name: travel-tracking-html5-repo-host
-        parameters:
-          content-target: true
-    build-parameters:
-      build-result: app/
-      requires:
-        - name: travel-tracking-traveltrackingui
-          artifacts:
-            - traveltrackingui.zip
-          target-path: app//
-        - name: travel-tracking-budgetmanagerui
-          artifacts:
-            - budgetmanagerui.zip
-          target-path: app//
-        - name: travel-tracking-budgetanalyticsui
-          artifacts:
-            - budgetanalyticsui.zip
-          target-path: app//
-        - name: travel-tracking-budgetui
-          artifacts:
-            - budgetui.zip
-          target-path: app//
-
-  # ----- TRAVEL TRACKING UI -----
-  - name: travel-tracking-traveltrackingui
-    type: html5
-    path: app/traveltrackingui
-    build-parameters:
-      build-result: dist
-      builder: custom
-      commands:
-        - npm ci
-        - npx ui5 build --clean-dest --dest dist
-      supported-platforms: []
-
-  # ----- BUDGET MANAGER UI -----
-  - name: travel-tracking-budgetmanagerui
-    type: html5
-    path: app/budgetmanagerui
-    build-parameters:
-      build-result: dist
-      builder: custom
-      commands:
-        - npm ci
-        - npx ui5 build --clean-dest --dest dist
-      supported-platforms: []
-
-  # ----- BUDGET ANALYTICS UI -----
-  - name: travel-tracking-budgetanalyticsui
-    type: html5
-    path: app/budgetanalyticsui
-    build-parameters:
-      build-result: dist
-      builder: custom
-      commands:
-        - npm ci
-        - npx ui5 build --clean-dest --dest dist
-      supported-platforms: []
-
-  # ----- BUDGET COMBINED UI -----
-  - name: travel-tracking-budgetui
-    type: html5
-    path: app/budgetui
-    build-parameters:
-      build-result: dist
-      builder: custom
-      commands:
-        - npm ci
-        - npx ui5 build --clean-dest --dest dist
-      supported-platforms: []
-
-  # ----- APP ROUTER -----
-  - name: travel-tracking-approuter
-    type: approuter.nodejs
-    path: approuter
-    parameters:
-      buildpack: nodejs_buildpack
-      memory: 256M
-      disk-quota: 256M
-    requires:
-      - name: srv-api
-        group: destinations
-        properties:
-          name: srv-api
-          url: ~{srv-url}
-          forwardAuthToken: true
-      - name: travel-tracking-auth
-      - name: travel-tracking-html5-repo-runtime
-
-resources:
-  # ----- HANA DATABASE -----
-  - name: travel-tracking-db
-    type: com.sap.xs.hdi-container
-    parameters:
-      service: hana
-      service-plan: hdi-shared
-
-  # ----- XSUAA -----
-  - name: travel-tracking-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: travel-tracking-${org}-${space}
-        tenant-mode: dedicated
-
-  # ----- HTML5 REPO HOST -----
-  - name: travel-tracking-html5-repo-host
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-host
-
-  # ----- HTML5 REPO RUNTIME -----
-  - name: travel-tracking-html5-repo-runtime
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-runtime
+  - builder: custom
+    commands:
+    - npm install --production
+    - npx -p @sap/cds-dk cds build --production

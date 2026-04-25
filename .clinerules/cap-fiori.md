@@ -134,3 +134,5 @@ Use Parameters to map LocalDataProperty to ValueListProperty.
 Dropdown vs Popup: If the associated entity is a "Type" or "Status" table (small dataset), use @Common.ValueListWithFixedValues: true.
 
 Text Only: For IDs used in Value Helps, always use @Common.TextArrangement: #TextOnly.
+
+- Generating MTA - Use the sample MTA present in .clinerules name sampleMTA.yaml to Generate an MTA in similar structure
