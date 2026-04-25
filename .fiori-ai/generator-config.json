@@ -1,0 +1,32 @@
+{
+    "version": "0.2",
+    "floorplan": "FE_LROP",
+    "project": {
+        "name": "traveltrackingui",
+        "targetFolder": "/Users/I537743/Coding/travelTracking",
+        "title": "Travel Expense Tracker",
+        "description": "Track travel expenses for the team",
+        "ui5Version": "1.132.1",
+        "localUI5Version": "1.82.2",
+        "sapux": true
+    },
+    "service": {
+        "servicePath": "/service/TravelRequest/",
+        "capService": {
+            "projectPath": "/Users/I537743/Coding/travelTracking",
+            "serviceName": "TravelRequest",
+            "serviceCdsPath": "srv/service.cds"
+        }
+    },
+    "entityConfig": {
+        "mainEntity": {
+            "entityName": "TravelRequest"
+        },
+        "generateFormAnnotations": true
+    },
+    "projectType": "FORM_ENTRY_OBJECT_PAGE",
+    "telemetryData": {
+        "generationSourceName": "AI Headless",
+        "generationSourceVersion": "1.18.1"
+    }
+}

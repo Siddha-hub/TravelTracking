@@ -1,0 +1,40 @@
+{
+  "name": "travel-tracking",
+  "version": "1.0.0",
+  "description": "CAPM Application to track travel expenses for a team",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8",
+    "cds-plugin-ui5": "^0.13.0",
+    "eslint": "^9.39.4"
+  },
+  "workspaces": [
+    "app/*"
+  ],
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch",
+    "build": "cds build --production",
+    "watch-traveltrackingui": "cds watch --open traveltrackingui/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sql"
+      },
+      "[production]": {
+        "db": {
+          "kind": "hana-cloud"
+        }
+      }
+    }
+  },
+  "sapux": [
+    "app/traveltrackingui"
+  ]
+}
