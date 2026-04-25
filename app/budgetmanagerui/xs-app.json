@@ -5,7 +5,7 @@
     {
       "source": "^/service/(.*)$",
       "target": "/service/$1",
-      "destination": "travel-tracking-srv-api",
+      "destination": "travel-tracking-srv",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },

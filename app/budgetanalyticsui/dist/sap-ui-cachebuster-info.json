@@ -1,10 +1,10 @@
 {
   "Component.js": "0235f585d6f2746fb2f3d0d482a3cdd1b92a9627",
-  "manifest.json": "98398e4cf4adc80025689deaf75e03a6e30f64e9",
+  "manifest.json": "b4c7f81b4bdace142da1fd67c2f74492ee9e491e",
   "i18n/i18n.properties": "0a86bd16f4a3e02476d03479f06ef6305f05d21c",
   "Component-dbg.js": "30d11d849740a38b409040798725c612caa695f4",
   "Component.js.map": "035b9e3d8c39256900858b6e9f5e1f6e17b2deea",
   "index.html": "bc08e4b1b81651007bddc1460c74a622dd7a3a1c",
-  "Component-preload.js": "ea273071227f7519a74a7bbc25547d0ce2ef4915",
+  "Component-preload.js": "2e40ec06db314010964dd11ed2bfd088a19ec5bf",
   "Component-preload.js.map": "5c722d844aae1d2b506fedc656be8c4e9d6c8fec"
 }

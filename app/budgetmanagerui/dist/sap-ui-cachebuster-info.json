@@ -1,10 +1,10 @@
 {
-  "Component.js.map": "f5a6a3fbccebcdb5214c1e4b724590868dce60cf",
+  "Component-preload.js": "e70b9aa9318666093e1178c607f6c4a0e8d89d4c",
+  "manifest.json": "89c2383b93ef4628abccf69d0132feb9a406afe4",
   "Component.js": "dfa63bdf4a6a3d8bdc7313712afe01b049ca19db",
-  "manifest.json": "624e76ba5f66d43a5d32f1f414207b1f7a8021bb",
   "Component-dbg.js": "5064a401b75e2b83f0839ae9e228e7f9c099308d",
-  "i18n/i18n.properties": "7d9d7acb0417acd1021c2602d93589ba97980e0e",
+  "Component.js.map": "f5a6a3fbccebcdb5214c1e4b724590868dce60cf",
   "index.html": "3745d1da3d5f2b50366ee300553771327002730a",
-  "Component-preload.js": "4093145cafd065d4ef6ffbc8d129cda21098692b",
+  "i18n/i18n.properties": "7d9d7acb0417acd1021c2602d93589ba97980e0e",
   "Component-preload.js.map": "64532df8968847fff55b1b3ec0be9944c860a859"
 }

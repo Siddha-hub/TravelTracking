@@ -29,6 +29,19 @@
 					"odataVersion": "4.0"
 				}
 			}
+		},
+		"crossNavigation": {
+			"inbounds": {
+				"budgetui-display": {
+					"semanticObject": "Budget",
+					"action": "display",
+					"title": "{{appTitle}}",
+					"signature": {
+						"parameters": {},
+						"additionalParameters": "allowed"
+					}
+				}
+			}
 		}
 	},
 	"sap.ui": {
@@ -163,6 +176,10 @@
 			}
 		},
 		"flexBundle": false
+	},
+	"sap.cloud": {
+		"public": true,
+		"service": "sap.travel.tracking"
 	},
 	"sap.fiori": {
 		"registrationIds": [],
