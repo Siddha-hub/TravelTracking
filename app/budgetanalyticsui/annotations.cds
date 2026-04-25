@@ -56,6 +56,9 @@ annotate service.BudgetAnalytics with {
     currency        @title: 'Currency';
 };
 
+// Note: Names and FiscalYears entity annotations (Common.Text, UI.Hidden)
+// are defined in traveltrackingui/annotations.cds to avoid duplicates
+
 // ---------- Header Info ----------
 annotate service.BudgetAnalytics with @(
     UI.HeaderInfo: {

@@ -53,15 +53,15 @@ annotate service.TravelRequest with {
     currency       @title: 'Currency';
 };
 
-// ---------- Names entity annotations ----------
+// ---------- Names entity: show fullName as text for ID ----------
 annotate service.Names with {
-    ID       @UI.Hidden;
+    ID       @UI.Hidden  @Common.Text: fullName  @Common.TextArrangement: #TextOnly;
     fullName @title: 'Full Name';
 };
 
-// ---------- FiscalYears entity annotations ----------
+// ---------- FiscalYears entity: show year as text for ID ----------
 annotate service.FiscalYears with {
-    ID   @UI.Hidden;
+    ID   @UI.Hidden  @Common.Text: year  @Common.TextArrangement: #TextOnly;
     year @title: 'Fiscal Year';
 };
 
