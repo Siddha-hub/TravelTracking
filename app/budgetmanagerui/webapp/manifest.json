@@ -24,6 +24,19 @@
           "odataVersion": "4.0"
         }
       }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "budgetmanager-display": {
+          "semanticObject": "TravelBudget",
+          "action": "manage",
+          "title": "{{appTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
     }
   },
   "sap.ui": {
@@ -133,6 +146,10 @@
         }
       }
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "sap.travel.tracking"
   },
   "sap.fiori": {
     "registrationIds": [],
