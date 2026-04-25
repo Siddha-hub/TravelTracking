@@ -84,7 +84,9 @@ yo @sap/fiori:headless "/Users/I537743/Coding/travelTracking/.fiori-ai/generator
 
 - If cuid is added to entity, then ID will be uuid, so ensure sample data will have ID type uuid.
 
--Fundamental UI Architecture
+- use https://ui5.sap.com/1.146.0/resources/sap-ui-core.js for bootstrapping UI5 version
+
+- Fundamental UI Architecture
 Metadata-Driven UI: Never suggest custom UI5 XML views unless explicitly asked. Always use Fiori Elements (LROP - List Report Object Page).
 
 Draft & Side Effects: Since the app is draft-enabled, ensure @Common.SideEffects are considered when a field change (like Quantity) should update another field (like Total Price).
