@@ -1,28 +1,21 @@
 {
   "xsappname": "travel-tracking",
   "tenant-mode": "dedicated",
+  "description": "Security profile of called application",
   "scopes": [
     {
-      "name": "$XSAPPNAME.admin",
-      "description": "Admin Access"
+      "name": "uaa.user",
+      "description": "UAA"
     }
   ],
   "role-templates": [
     {
-      "name": "TravelAdmin",
-      "description": "Travel Tracking Administrator",
+      "name": "Token_Exchange",
+      "description": "UAA",
       "scope-references": [
-        "$XSAPPNAME.admin"
+        "uaa.user"
       ]
     }
   ],
-  "role-collections": [
-    {
-      "name": "TravelTracking_Admin",
-      "description": "Travel Tracking Admin Role Collection",
-      "role-template-references": [
-        "$XSAPPNAME.TravelAdmin"
-      ]
-    }
-  ]
+  "attributes": []
 }

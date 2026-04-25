@@ -1,0 +1,20 @@
+specVersion: "3.0"
+metadata:
+  name: budgetanalyticsui
+type: application
+builder:
+  cachebuster:
+    signatureType: hash
+  resources:
+    excludes:
+      - "/test/**"
+      - "/localService/**"
+  customTasks:
+    - name: ui5-task-minifier
+      afterTask: minify
+    - name: ui5-task-zipper
+      afterTask: generateCachebusterInfo
+      configuration:
+        archiveName: budgetanalyticsui
+        additionalFiles:
+          - xs-app.json

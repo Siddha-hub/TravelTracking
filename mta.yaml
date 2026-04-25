@@ -3,9 +3,6 @@ ID: travel-tracking
 description: Travel Tracking & Budget Management Application
 version: 1.0.0
 modules:
-#---------------------------------------------
-# Service module
-#---------------------------------------------
 - name: travel-tracking-srv
   type: nodejs
   path: gen/srv
@@ -18,30 +15,24 @@ modules:
       srv-url: ${default-url}
   parameters:
     buildpack: nodejs_buildpack
-    memory: 256M
     disk-quota: 1024M
+    memory: 256M
   build-parameters:
-     ignore: ["node_modules/"]
-
-#---------------------------------------------
-# DB deployer module
-#---------------------------------------------
+    ignore:
+    - node_modules/
 - name: travel-tracking-db-deployer
   type: hdb
   path: gen/db
+  properties:
+    HDI_DEPLOY_OPTIONS: '{ "auto_undeploy": true, "trace": true }'
   requires:
   - name: travel-tracking-db
   - name: travel-tracking-uaa
   parameters:
     buildpack: nodejs_buildpack
-  properties:
-    HDI_DEPLOY_OPTIONS: "{ \"auto_undeploy\": true, \"trace\": true }"
   build-parameters:
-     ignore: ["node_modules/"]
-
-#---------------------------------------------
-# Destinations module
-#---------------------------------------------
+    ignore:
+    - node_modules/
 - name: travel-tracking-destinations
   type: com.sap.application.content
   requires:
@@ -79,10 +70,6 @@ modules:
         existing_destinations_policy: update
   build-parameters:
     no-source: true
-
-#---------------------------------------------
-# UI app deployer module
-#---------------------------------------------
 - name: travel-tracking-app-content
   type: com.sap.application.content
   path: .
@@ -109,10 +96,6 @@ modules:
       - budgetui.zip
       name: travel-tracking-budgetui
       target-path: resources/
-
-#---------------------------------------------
-# UI app module - Travel Tracking
-#---------------------------------------------
 - name: travel-tracking-traveltrackingui
   type: html5
   path: app/traveltrackingui
@@ -122,12 +105,9 @@ modules:
     commands:
     - npm install
     - npm run build:cf
+    ignore:
+    - node_modules/
     supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# UI app module - Budget Manager
-#---------------------------------------------
 - name: travel-tracking-budgetmanagerui
   type: html5
   path: app/budgetmanagerui
@@ -137,12 +117,9 @@ modules:
     commands:
     - npm install
     - npm run build:cf
+    ignore:
+    - node_modules/
     supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# UI app module - Budget Analytics
-#---------------------------------------------
 - name: travel-tracking-budgetanalyticsui
   type: html5
   path: app/budgetanalyticsui
@@ -152,12 +129,9 @@ modules:
     commands:
     - npm install
     - npm run build:cf
+    ignore:
+    - node_modules/
     supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# UI app module - Budget Combined
-#---------------------------------------------
 - name: travel-tracking-budgetui
   type: html5
   path: app/budgetui
@@ -167,17 +141,10 @@ modules:
     commands:
     - npm install
     - npm run build:cf
+    ignore:
+    - node_modules/
     supported-platforms: []
-    ignore: ["node_modules/"]
-
-#---------------------------------------------
-# REQUIRED RESOURCES
-#---------------------------------------------
 resources:
-
-#---------------------------------------------
-# HDI container instance
-#---------------------------------------------
 - name: travel-tracking-db
   type: com.sap.xs.hdi-container
   parameters:
@@ -185,10 +152,6 @@ resources:
     service-plan: hdi-shared
   properties:
     hdi-service-name: ${service-name}
-
-#---------------------------------------------
-# UAA service instance & Role Collections
-#---------------------------------------------
 - name: travel-tracking-uaa
   type: org.cloudfoundry.managed-service
   parameters:
@@ -203,10 +166,6 @@ resources:
     path: ./xs-security.json
     service: xsuaa
     service-plan: application
-
-#---------------------------------------------
-# Destination (UI5 CDN) service instance
-#---------------------------------------------
 - name: travel-tracking-destination
   type: org.cloudfoundry.managed-service
   parameters:
@@ -224,19 +183,11 @@ resources:
       version: 1.0.0
     service: destination
     service-plan: lite
-
-#---------------------------------------------
-# HTML repo service instance
-#---------------------------------------------
 - name: travel-tracking-html5-repo-host
   type: org.cloudfoundry.managed-service
   parameters:
     service: html5-apps-repo
     service-plan: app-host
-
-#---------------------------------------------
-# Global MTA parameters
-#---------------------------------------------
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
