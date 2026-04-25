@@ -1,0 +1,28 @@
+{
+  "xsappname": "travel-tracking",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.admin",
+      "description": "Admin Access"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "TravelAdmin",
+      "description": "Travel Tracking Administrator",
+      "scope-references": [
+        "$XSAPPNAME.admin"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "TravelTracking_Admin",
+      "description": "Travel Tracking Admin Role Collection",
+      "role-template-references": [
+        "$XSAPPNAME.TravelAdmin"
+      ]
+    }
+  ]
+}

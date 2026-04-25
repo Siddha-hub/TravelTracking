@@ -5,7 +5,10 @@
   "private": true,
   "dependencies": {
     "@sap/cds": "^8",
-    "express": "^4"
+    "@sap/xssec": "^4",
+    "passport": "^0.7",
+    "express": "^4",
+    "@cap-js/hana": "^1"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1",
@@ -13,9 +16,9 @@
     "cds-plugin-ui5": "^0.13.0",
     "eslint": "^9.39.4"
   },
-  "workspaces": [
-    "app/*"
-  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "cds-serve",
     "watch": "cds watch",
@@ -27,14 +30,23 @@
       "db": {
         "kind": "sql"
       },
+      "auth": {
+        "kind": "dummy"
+      },
       "[production]": {
         "db": {
           "kind": "hana-cloud"
+        },
+        "auth": {
+          "kind": "xsuaa"
         }
       }
     }
   },
   "sapux": [
-    "app/traveltrackingui"
+    "app/traveltrackingui",
+    "app/budgetmanagerui",
+    "app/budgetanalyticsui",
+    "app/budgetui"
   ]
 }

@@ -2,13 +2,67 @@ using TravelRequest as service from '../../srv/service';
 
 // ---------- Field-level Annotations ----------
 annotate service.TravelRequest with {
-    ID              @UI.Hidden;
-    name            @mandatory;
-    customerName    @mandatory;
-    travelFromDate  @mandatory;
-    travelToDate    @mandatory;
-    expenseAmount   @mandatory  @Measures.ISOCurrency: currency;
-    currency        @title: 'Currency';
+    ID @UI.Hidden;
+
+    name @(
+        Common.Text                     : name.fullName,
+        Common.TextArrangement          : #TextOnly,
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList                : {
+            Label          : 'Employee Names',
+            CollectionPath : 'Names',
+            Parameters     : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : name_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'fullName'
+                }
+            ]
+        }
+    );
+
+    fiscalYear @(
+        Common.Text                     : fiscalYear.year,
+        Common.TextArrangement          : #TextOnly,
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList                : {
+            Label          : 'Fiscal Years',
+            CollectionPath : 'FiscalYears',
+            Parameters     : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : fiscalYear_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'year'
+                }
+            ]
+        }
+    );
+
+    customerName   @mandatory;
+    travelFromDate @mandatory;
+    travelToDate   @mandatory;
+    expenseAmount  @mandatory @Measures.ISOCurrency: currency;
+    currency       @title: 'Currency';
+};
+
+// ---------- Names entity annotations ----------
+annotate service.Names with {
+    ID       @UI.Hidden;
+    fullName @title: 'Full Name';
+};
+
+// ---------- FiscalYears entity annotations ----------
+annotate service.FiscalYears with {
+    ID   @UI.Hidden;
+    year @title: 'Fiscal Year';
 };
 
 // ---------- Header Info ----------
@@ -16,7 +70,7 @@ annotate service.TravelRequest with @(
     UI.HeaderInfo: {
         TypeName       : 'Travel Expense',
         TypeNamePlural : 'Travel Expenses',
-        Title          : { $Type: 'UI.DataField', Value: name },
+        Title          : { $Type: 'UI.DataField', Value: name.fullName },
         Description    : { $Type: 'UI.DataField', Value: customerName }
     }
 );
@@ -24,8 +78,9 @@ annotate service.TravelRequest with @(
 // ---------- Selection Fields (Filters) ----------
 annotate service.TravelRequest with @(
     UI.SelectionFields: [
-        name,
+        name_ID,
         customerName,
+        fiscalYear_ID,
         travelFromDate,
         travelToDate
     ]
@@ -34,12 +89,13 @@ annotate service.TravelRequest with @(
 // ---------- List Report (Table Columns) ----------
 annotate service.TravelRequest with @(
     UI.LineItem: [
-        { $Type: 'UI.DataField', Value: name,           Label: 'Employee Name',     ![@UI.Importance]: #High },
-        { $Type: 'UI.DataField', Value: customerName,   Label: 'Customer Name',     ![@UI.Importance]: #High },
-        { $Type: 'UI.DataField', Value: travelFromDate, Label: 'Travel From Date',  ![@UI.Importance]: #High },
-        { $Type: 'UI.DataField', Value: travelToDate,   Label: 'Travel To Date' },
-        { $Type: 'UI.DataField', Value: expenseAmount,  Label: 'Expense Amount' },
-        { $Type: 'UI.DataField', Value: currency,       Label: 'Currency' }
+        { $Type: 'UI.DataField', Value: name_ID,         Label: 'Employee Name',        ![@UI.Importance]: #High },
+        { $Type: 'UI.DataField', Value: customerName,     Label: 'Customer Name',        ![@UI.Importance]: #High },
+        { $Type: 'UI.DataField', Value: fiscalYear_ID,    Label: 'Fiscal Year',          ![@UI.Importance]: #High },
+        { $Type: 'UI.DataField', Value: travelFromDate,   Label: 'Travel From Date',     ![@UI.Importance]: #High },
+        { $Type: 'UI.DataField', Value: travelToDate,     Label: 'Travel To Date' },
+        { $Type: 'UI.DataField', Value: expenseAmount,    Label: 'Appx Expense Amount' },
+        { $Type: 'UI.DataField', Value: currency,         Label: 'Currency' }
     ]
 );
 
@@ -49,8 +105,9 @@ annotate service.TravelRequest with @(
         $Type: 'UI.FieldGroupType',
         Label: 'General Information',
         Data : [
-            { $Type: 'UI.DataField', Value: name,         Label: 'Employee Name' },
-            { $Type: 'UI.DataField', Value: customerName,  Label: 'Customer Name' }
+            { $Type: 'UI.DataField', Value: name_ID,        Label: 'Employee Name' },
+            { $Type: 'UI.DataField', Value: customerName,    Label: 'Customer Name' },
+            { $Type: 'UI.DataField', Value: fiscalYear_ID,   Label: 'Fiscal Year' }
         ]
     },
 
@@ -67,7 +124,7 @@ annotate service.TravelRequest with @(
         $Type: 'UI.FieldGroupType',
         Label: 'Expense Details',
         Data : [
-            { $Type: 'UI.DataField', Value: expenseAmount, Label: 'Expense Amount' },
+            { $Type: 'UI.DataField', Value: expenseAmount, Label: 'Appx Expense Amount' },
             { $Type: 'UI.DataField', Value: currency,      Label: 'Currency' }
         ]
     }
