@@ -65,21 +65,9 @@ modules:
             name: travel-tracking-repo-host-key
     parameters:
       content:
-        subaccount:
-          destinations:
-            - Name: travel-tracking-srv
-              Authentication: OAuth2JWTBearer
-              TokenServiceInstanceName: travel-tracking-auth
-              TokenServiceKeyName: travel-tracking-auth-key
-              URL: ~{srv-api/srv-url}
-              sap.cloud.service: sap.travel.tracking
-              HTML5.DynamicDestination: true
-              WebIDEEnabled: true
-              WebIDEUsage: odata_gen
-          existing_destinations_policy: update
         instance:
           destinations:
-            - Name: travel-tracking-srv-api
+            - Name: travel-tracking-srv
               Authentication: OAuth2JWTBearer
               TokenServiceInstanceName: travel-tracking-auth
               TokenServiceKeyName: travel-tracking-auth-key
@@ -222,3 +210,4 @@ resources:
         version: 1.0.0
       service-keys:
         - name: travel-tracking-dest-key
+    

@@ -1,10 +1,10 @@
 {
-  "index.html": "79d01413a386d9a1c408efc5487ca3effac18046",
-  "Component.js": "d013d04590d2c37865a54397652d355686f1c128",
+  "Component-preload.js": "3e1654eb7ca2dc2a88ae3411c9ec83570d5e518d",
   "manifest.json": "5f7c84fc7ce2e0e634467785178e001d02993ff9",
+  "Component.js": "d013d04590d2c37865a54397652d355686f1c128",
   "Component-dbg.js": "fec334eec0b00f84470b585cd231b79872bcbd7e",
   "Component.js.map": "6a8d911e98156aa96209955788ea86e0abcf5151",
+  "index.html": "79d01413a386d9a1c408efc5487ca3effac18046",
   "i18n/i18n.properties": "1259d3a204e39ec1089ca44b36799ea58ce37d0c",
-  "Component-preload.js": "3e1654eb7ca2dc2a88ae3411c9ec83570d5e518d",
   "Component-preload.js.map": "cc7a954f49176e8bf7915a70bca863d863ce370f"
 }

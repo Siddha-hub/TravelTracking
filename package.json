@@ -1,54 +1,55 @@
 {
-  "name": "travel-tracking",
-  "version": "1.0.0",
-  "description": "CAPM Application to track travel expenses for a team",
-  "private": true,
-  "dependencies": {
-    "@sap/cds": "^8",
-    "@sap/xssec": "^4",
-    "passport": "^0.7",
-    "express": "^4",
-    "@cap-js/hana": "^1"
-  },
-  "devDependencies": {
-    "@cap-js/sqlite": "^1",
-    "@sap/cds-dk": "^8",
-    "cds-plugin-ui5": "^0.13.0",
-    "eslint": "^9.39.4"
-  },
-  "engines": {
-    "node": ">=20"
-  },
-  "scripts": {
-    "start": "cds-serve",
-    "watch": "cds watch",
-    "build": "mbt build --mtar travelTracker.mtar",
-    "build:cf": "npx cds build --production",
-    "watch-traveltrackingui": "cds watch --open traveltrackingui/index.html?sap-ui-xx-viewCache=false --livereload false",
-    "undeploy": "cf undeploy travel-tracking"
-  },
-  "cds": {
-    "requires": {
-      "db": {
-        "kind": "sql"
-      },
-      "auth": {
-        "kind": "dummy"
-      },
-      "[production]": {
-        "db": {
-          "kind": "hana-cloud"
-        },
-        "auth": {
-          "kind": "xsuaa"
-        }
-      }
-    }
-  },
-  "sapux": [
-    "app/traveltrackingui",
-    "app/budgetmanagerui",
-    "app/budgetanalyticsui",
-    "app/budgetui"
-  ]
+	"name": "travel-tracking",
+	"version": "1.0.0",
+	"description": "CAPM Application to track travel expenses for a team",
+	"private": true,
+	"dependencies": {
+		"@sap/cds": "^8",
+		"@sap/xssec": "^4",
+		"passport": "^0.7",
+		"express": "^4",
+		"@cap-js/hana": "^1"
+	},
+	"devDependencies": {
+		"@cap-js/sqlite": "^1",
+		"@sap/cds-dk": "^8",
+		"cds-plugin-ui5": "^0.13.0",
+		"eslint": "^9.39.4",
+		"@sap/dev-cap-tools": "^1.31.0"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"start": "cds-serve",
+		"watch": "cds watch",
+		"build": "mbt build --mtar travelTracker.mtar",
+		"build:cf": "npx cds build --production",
+		"watch-traveltrackingui": "cds watch --open traveltrackingui/index.html?sap-ui-xx-viewCache=false --livereload false",
+		"undeploy": "cf undeploy travel-tracking"
+	},
+	"cds": {
+		"requires": {
+			"db": {
+				"kind": "sql"
+			},
+			"auth": {
+				"kind": "dummy"
+			},
+			"[production]": {
+				"db": {
+					"kind": "hana-cloud"
+				},
+				"auth": {
+					"kind": "xsuaa"
+				}
+			}
+		}
+	},
+	"sapux": [
+		"app/traveltrackingui",
+		"app/budgetmanagerui",
+		"app/budgetanalyticsui",
+		"app/budgetui"
+	]
 }
